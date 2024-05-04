@@ -1,10 +1,13 @@
-import time
-
 import allure
 import pytest
 from allure_commons.types import AttachmentType
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import (ElementNotVisibleException,
+                                        ElementNotSelectableException)
 
 
 # Selenium 4 - TC
@@ -14,14 +17,7 @@ from selenium.webdriver.common.by import By
 @allure.description("TC#1 - Simple Login check on vwo.com Website.")
 def test_vwologin_negative():
     driver = webdriver.Chrome()
-    # driver.implicitly_wait(5) - Webdriver to wait for all the elements
-    # time.sleep(5) - time.sleep(15) #-> Thread.sleep() , Python Int  wait.
     driver.get("https://app.vwo.com")
-
-    # e1, e2 , e3 ->
-    # Tell Webdriver to wait for the 5 to Load
-    # All the elements.
-    # What if the e1,e2,e3 < 3, then 2 wasted.
 
     email_input = driver.find_element(By.CSS_SELECTOR, "[name='username']")
     pass_input = driver.find_element(By.CSS_SELECTOR, "[name='password']")
@@ -32,10 +28,16 @@ def test_vwologin_negative():
     button_submit_element = driver.find_element(By.ID, "js-login-btn")
     button_submit_element.click()
 
-    # Python - Int - It is super bad practice - time.sleep(5) - Worst type of Wait.
-    # Webdriver
+    # Fluent Wait ( EW)
+    ignore_list = [ElementNotVisibleException, ElementNotSelectableException]
 
-    time.sleep(5)  # This is Python Int who is waiting, Python Execution Halt.
+    wait = WebDriverWait(driver, timeout=60, poll_frequency=1, ignored_exceptions=ignore_list)
+    wait.until(
+        EC.visibility_of_element_located((By.ID, "js-notification-box-msg"))
+    )
+
+    # EW - Checking - t0,0,1,02,......5
+    # EW - FW ,  t1, 2, 3, 4, 5
 
     error_msg_element = driver.find_element(By.ID, "js-notification-box-msg")
     print(error_msg_element.text)
